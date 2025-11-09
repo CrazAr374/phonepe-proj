@@ -7,25 +7,30 @@ import os
 import json
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
 from datetime import datetime
 import uuid
+
+# Try to load dotenv, but don't fail if not available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
 from pdf_processor import extract_text_from_pdf
 from transaction_parser import TransactionParser
 from insights_generator import InsightsGenerator
 
-# Load environment variables
-load_dotenv()
-
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production-vercel-deployment')
+
+# Use /tmp for Vercel serverless functions (writable directory)
+app.config['UPLOAD_FOLDER'] = '/tmp'
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
 
-# Create upload folder
+# Ensure /tmp exists (it should on Vercel)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize processors
